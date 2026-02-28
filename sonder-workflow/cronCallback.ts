@@ -129,8 +129,10 @@ export async function onCronTrigger(runtime: Runtime<Config>): Promise<string> {
 
     const priceDrop =
         prevPrice6dec > 0 ? (prevPrice6dec - price6dec) / prevPrice6dec : 0;
+    const priceSwing = Math.abs(priceDrop); // anomaly in either direction
+    const swingDir = priceDrop >= 0 ? "↓" : "↑";
     runtime.log(
-        `[Step 2] On-chain: ${prevPrice6dec} | New: ${price6dec} | Drop: ${(priceDrop * 100).toFixed(2)}%`
+        `[Step 2] On-chain: ${prevPrice6dec} | New: ${price6dec} | ${swingDir} Swing: ${(priceSwing * 100).toFixed(2)}%`
     );
 
     // ─── Step 3: Update PriceOracle on-chain ───────────────────────────────
@@ -156,18 +158,18 @@ export async function onCronTrigger(runtime: Runtime<Config>): Promise<string> {
 
     // ─── Step 4: Anomaly check → AI Guardian ───────────────────────────────
     const dropThreshold = parseFloat(config.anomalyDropThreshold);
-    if (priceDrop >= dropThreshold && prevPrice6dec > 0) {
-        runtime.log(
-            `[Step 4] ⚠ ANOMALY: ${(priceDrop * 100).toFixed(2)}% drop — fetching market comments + consulting AI Guardian...`
-        );
+    if (priceSwing >= dropThreshold && prevPrice6dec > 0) {
+        runtime.log(`[Step 4] ⚠ ANOMALY DETECTED: ${(priceSwing * 100).toFixed(2)}% ${swingDir} swing exceeds threshold of ${(dropThreshold * 100).toFixed(0)}%`);
+        runtime.log(`[Step 4] Pipeline: Polymarket CLOB → Gamma Comments → Gemini AI + Google Search → Verdict`);
 
-        // ── Fetch last 2 pages of market comments (20 per page) ──────────
+        // ── Fetch community comments from Polymarket Gamma API ────────────
         const COMMENTS_PER_PAGE = 10;
         let allComments: Array<{ body: string; createdAt: string; author: string }> = [];
 
         for (let page = 0; page < 2; page++) {
             const offset = page * COMMENTS_PER_PAGE;
             const commentsUrl = `https://gamma-api.polymarket.com/comments?parent_entity_id=${config.eventId}&parent_entity_type=Event&limit=${COMMENTS_PER_PAGE}&offset=${offset}`;
+            runtime.log(`[Step 4] Fetching comments page ${page + 1}: ${commentsUrl}`);
 
             try {
                 const commentsBody = runtime.runInNodeMode(
@@ -197,30 +199,29 @@ export async function onCronTrigger(runtime: Runtime<Config>): Promise<string> {
                         author: c.profile?.name ?? "anonymous",
                     });
                 }
-
+                runtime.log(`[Step 4] Page ${page + 1}: ${parsed.length} comments (total so far: ${allComments.length})`);
                 if (parsed.length < COMMENTS_PER_PAGE) break;
             } catch {
-                runtime.log(`[Step 4] Could not fetch comments page ${page}`);
+                runtime.log(`[Step 4] Could not fetch comments page ${page + 1}`);
                 break;
             }
         }
 
-        runtime.log(`[Step 4] Fetched ${allComments.length} recent market comments`);
+        runtime.log(`[Step 4] ✓ ${allComments.length} community comments ready — handing off to AI Guardian`);
 
-        const aiDecision = await analyzeAnomaly(runtime, {
+        // analyzeAnomaly logs the full pipeline (Steps A-F) internally
+        await analyzeAnomaly(runtime, {
             marketId: config.marketId,
             currentPrice: midFloat,
             previousPrice: prevPrice6dec / 1_000_000,
-            priceDrop,
+            priceDrop: priceSwing,
             geminiModel: config.geminiModel,
             recentComments: allComments,
         });
-        runtime.log(
-            `[Step 4] AI: ${aiDecision.recommendation} (${aiDecision.confidence}) — ${aiDecision.reason}`
-        );
     } else {
-        runtime.log(`[Step 4] No anomaly detected (drop: ${(priceDrop * 100).toFixed(2)}% < threshold: ${(dropThreshold * 100).toFixed(0)}%)`);
+        runtime.log(`[Step 4] No anomaly (swing: ${(priceSwing * 100).toFixed(2)}% | threshold: ${(dropThreshold * 100).toFixed(0)}%) — AI Guardian not triggered`);
     }
+
 
     // ─── Step 5: Health Factor Monitoring ──────────────────────────────────
     runtime.log("[Step 5] Checking borrower health factors...");
@@ -362,5 +363,5 @@ export async function onCronTrigger(runtime: Runtime<Config>): Promise<string> {
     runtime.log("[Step 6] CRE cycle complete ✓");
     runtime.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-    return `price=${price6dec},drop=${(priceDrop * 100).toFixed(2)}%,liquidatable=${liquidatableCount},atRisk=${atRiskCount}`;
+    return `price=${price6dec},drop=${(priceSwing * 100).toFixed(2)}%,liquidatable=${liquidatableCount},atRisk=${atRiskCount}`;
 }
