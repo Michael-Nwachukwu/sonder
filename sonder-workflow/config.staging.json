@@ -1,0 +1,15 @@
+{
+  "schedule": "0 */15 * * * *",
+  "priceOracleAddress": "0x323117CE686E0FdF05546145af1078A1Eb855295",
+  "lendingPoolAddress": "0x6Bf79FAEbf328B195B8910dc0bf551EE1d2e032B",
+  "marketRegistryAddress": "0xDb4F9Fd48FcEbc9D575147c990aB24ce45F9EE19",
+  "polymarketTokenId": "107505882767731489358349912513945399560393482969656700824895970500493757150417",
+  "marketId": "1",
+  "geminiModel": "gemini-2.0-flash",
+  "chainSelectorName": "evm-testnet-polygon-amoy",
+  "gasLimit": "500000",
+  "anomalyDropThreshold": "0.10",
+  "eventId": "90177",
+  "warningHF": "1100000000000000000",
+  "liquidationHF": "1000000000000000000"
+}
