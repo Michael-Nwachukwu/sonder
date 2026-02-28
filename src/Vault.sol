@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
  * @title Vault
  * @notice Custodial contract for users' Polymarket ERC1155 shares.
  *
- * Users deposit YES/NO shares here as collateral for their PolyLend loans.
+ * Users deposit YES/NO shares here as collateral for their Sonder loans.
  * When a loan is repaid the shares are returned. When liquidated, the
  * LendingPool calls seizeCollateral() to take ownership for settlement.
  *

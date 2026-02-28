@@ -13,7 +13,7 @@ import "./Vault.sol";
 
 /**
  * @title LendingPool
- * @notice Core lending engine for PolyLend.
+ * @notice Core lending engine for Sonder.
  *
  * FLOW:
  * 1. User deposits Polymarket YES/NO shares into Vault
@@ -168,7 +168,7 @@ contract LendingPool is Ownable, ReentrancyGuard, ERC1155Holder {
 
     /**
      * @notice Borrow USDC against your deposited Polymarket collateral.
-     * @param marketId     The PolyLend market ID.
+     * @param marketId     The Sonder market ID.
      * @param borrowAmount USDC to borrow (in USDC's 6 decimals).
      */
     function borrow(

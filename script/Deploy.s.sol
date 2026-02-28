@@ -9,7 +9,7 @@ import "../src/LendingPool.sol";
 
 /**
  * @title Deploy
- * @notice Deploys the full PolyLend protocol.
+ * @notice Deploys the full Sonder protocol.
  *
  * Usage:
  *   forge script script/Deploy.s.sol --rpc-url $POLYGON_RPC_URL --broadcast --private-key $CRE_ETH_PRIVATE_KEY
@@ -95,7 +95,7 @@ contract Deploy is Script {
 
         vm.stopBroadcast();
 
-        console.log("\n=== PolyLend Deployment Complete ===");
+        console.log("\n=== Sonder Deployment Complete ===");
         console.log("Copy these to your .env and config.staging.json:");
         console.log("PRICE_ORACLE_ADDRESS=", address(oracle));
         console.log("MARKET_REGISTRY_ADDRESS=", address(registry));

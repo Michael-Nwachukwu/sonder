@@ -51,7 +51,7 @@ contract PriceOracle is Ownable {
 
     /**
      * @notice Update live price — called by CRE workflow via its funded wallet.
-     * @param marketId The PolyLend market ID.
+     * @param marketId The Sonder market ID.
      * @param price    In 6 decimals. E.g., 650000 = $0.65 (65% win probability).
      */
     function updatePrice(uint256 marketId, uint256 price) external {

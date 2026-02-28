@@ -35,7 +35,7 @@ contract MockCTF is ERC1155 {
 
 // ─── Test suite ───────────────────────────────────────────────────────────────
 
-contract PolyLendTest is Test {
+contract SonderTest is Test {
     PriceOracle oracle;
     MarketRegistry registry;
     Vault vault;
