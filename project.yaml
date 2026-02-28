@@ -1,0 +1,17 @@
+# ==========================================================================
+# CRE PROJECT SETTINGS FILE
+# ==========================================================================
+# Project-specific settings for CRE CLI targets.
+# Each target defines optional account, and rpcs groups.
+#
+# staging-settings is the default target name (matched by CRE_TARGET in .env)
+
+staging-settings:
+  rpcs:
+    - chain-name: polygon-mainnet
+      url: https://virtual.polygon.eu.rpc.tenderly.co/100d2753-2117-48ee-9012-d042ac7748d8
+
+production-settings:
+  rpcs:
+    - chain-name: polygon-mainnet
+      url: ${POLYGON_RPC_URL}
