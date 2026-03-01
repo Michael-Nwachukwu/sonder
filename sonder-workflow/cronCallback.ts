@@ -158,66 +158,117 @@ export async function onCronTrigger(runtime: Runtime<Config>): Promise<string> {
 
     // ─── Step 4: Anomaly check → AI Guardian ───────────────────────────────
     const dropThreshold = parseFloat(config.anomalyDropThreshold);
+    let anomalyDetected = false;
     if (priceSwing >= dropThreshold && prevPrice6dec > 0) {
+        anomalyDetected = true;
         runtime.log(`[Step 4] ⚠ ANOMALY DETECTED: ${(priceSwing * 100).toFixed(2)}% ${swingDir} swing exceeds threshold of ${(dropThreshold * 100).toFixed(0)}%`);
-        runtime.log(`[Step 4] Pipeline: Polymarket CLOB → Gamma Comments → Gemini AI + Google Search → Verdict`);
 
-        // ── Fetch community comments from Polymarket Gamma API ────────────
-        const COMMENTS_PER_PAGE = 10;
-        let allComments: Array<{ body: string; createdAt: string; author: string }> = [];
+        // Quick pre-check: any active loans? If not, skip the AI call entirely
+        const BORROWERS_CHECK = (config as any).borrowerAddresses
+            ? ((config as any).borrowerAddresses as string).split(",").map((a: string) => a.trim())
+            : ["0x6C9cbb059F5Dbf3f265256a55bbCA0184Dc60564"];
 
-        for (let page = 0; page < 2; page++) {
-            const offset = page * COMMENTS_PER_PAGE;
-            const commentsUrl = `https://gamma-api.polymarket.com/comments?parent_entity_id=${config.eventId}&parent_entity_type=Event&limit=${COMMENTS_PER_PAGE}&offset=${offset}`;
-            runtime.log(`[Step 4] Fetching comments page ${page + 1}: ${commentsUrl}`);
+        const GET_LOAN_CHECK_ABI = [{
+            name: "getLoan", type: "function",
+            inputs: [{ name: "user", type: "address" }],
+            outputs: [
+                { name: "marketId", type: "uint256" }, { name: "principal", type: "uint256" },
+                { name: "interestAccrued", type: "uint256" }, { name: "lastInterestUpdate", type: "uint256" },
+                { name: "active", type: "bool" },
+            ],
+            stateMutability: "view",
+        }] as const;
 
+        let hasActiveLoans = false;
+        for (const borrower of BORROWERS_CHECK) {
             try {
-                const commentsBody = runtime.runInNodeMode(
-                    (nodeRuntime) => {
-                        const res = httpClient
-                            .sendRequest(nodeRuntime, {
-                                url: commentsUrl,
-                                method: "GET",
-                                headers: { Accept: "application/json" },
-                            })
-                            .result();
-                        return new TextDecoder().decode(res.body);
-                    },
-                    consensusIdenticalAggregation<string>()
-                )().result();
-
-                const parsed = JSON.parse(commentsBody) as Array<{
-                    body: string;
-                    createdAt: string;
-                    profile?: { name?: string };
-                }>;
-
-                for (const c of parsed) {
-                    allComments.push({
-                        body: c.body,
-                        createdAt: c.createdAt,
-                        author: c.profile?.name ?? "anonymous",
-                    });
+                const calldata = encodeFunctionData({
+                    abi: GET_LOAN_CHECK_ABI,
+                    functionName: "getLoan",
+                    args: [borrower as `0x${string}`],
+                });
+                const loanRes = evmClient.callContract(runtime, {
+                    call: encodeCallMsg({
+                        from: "0x0000000000000000000000000000000000000000",
+                        to: config.lendingPoolAddress as `0x${string}`,
+                        data: calldata,
+                    }),
+                }).result();
+                if (loanRes.data && loanRes.data.length > 0) {
+                    const decoded = decodeAbiParameters(
+                        parseAbiParameters("uint256, uint256, uint256, uint256, bool"),
+                        toHex(loanRes.data)
+                    );
+                    if (decoded[4]) { hasActiveLoans = true; break; }
                 }
-                runtime.log(`[Step 4] Page ${page + 1}: ${parsed.length} comments (total so far: ${allComments.length})`);
-                if (parsed.length < COMMENTS_PER_PAGE) break;
-            } catch {
-                runtime.log(`[Step 4] Could not fetch comments page ${page + 1}`);
-                break;
-            }
+            } catch { /* ignore */ }
         }
 
-        runtime.log(`[Step 4] ✓ ${allComments.length} community comments ready — handing off to AI Guardian`);
+        if (!hasActiveLoans) {
+            runtime.log(`[Step 4] No active loans — skipping AI Guardian analysis (no exposure to protect)`);
+        } else {
+            runtime.log(`[Step 4] Active loan(s) found — running AI Guardian pipeline  [via CRE]`);
 
-        // analyzeAnomaly logs the full pipeline (Steps A-F) internally
-        await analyzeAnomaly(runtime, {
-            marketId: config.marketId,
-            currentPrice: midFloat,
-            previousPrice: prevPrice6dec / 1_000_000,
-            priceDrop: priceSwing,
-            geminiModel: config.geminiModel,
-            recentComments: allComments,
-        });
+            // ── Fetch community comments from Polymarket Gamma API ────────────
+            const COMMENTS_PER_PAGE = 10;
+            let allComments: Array<{ body: string; createdAt: string; author: string }> = [];
+
+            for (let page = 0; page < 2; page++) {
+                const offset = page * COMMENTS_PER_PAGE;
+                const commentsUrl = `https://gamma-api.polymarket.com/comments?parent_entity_id=${config.eventId}&parent_entity_type=Event&limit=${COMMENTS_PER_PAGE}&offset=${offset}`;
+                runtime.log(`[Step 4] Fetching comments page ${page + 1}: ${commentsUrl}`);
+
+                try {
+                    const commentsBody = httpClient
+                        .sendRequest(
+                            runtime,
+                            (sendRequester) => {
+                                const res = sendRequester
+                                    .sendRequest({
+                                        url: commentsUrl,
+                                        method: "GET",
+                                        headers: { Accept: "application/json" },
+                                    })
+                                    .result();
+                                return new TextDecoder().decode(res.body);
+                            },
+                            consensusIdenticalAggregation<string>()
+                        )()
+                        .result();
+
+                    const parsed = JSON.parse(commentsBody) as Array<{
+                        body: string;
+                        createdAt: string;
+                        profile?: { name?: string };
+                    }>;
+
+                    for (const c of parsed) {
+                        allComments.push({
+                            body: c.body,
+                            createdAt: c.createdAt,
+                            author: c.profile?.name ?? "anonymous",
+                        });
+                    }
+                    runtime.log(`[Step 4] Page ${page + 1}: ${parsed.length} comments (total so far: ${allComments.length})`);
+                    if (parsed.length < COMMENTS_PER_PAGE) break;
+                } catch {
+                    runtime.log(`[Step 4] Could not fetch comments page ${page + 1}`);
+                    break;
+                }
+            }
+
+            runtime.log(`[Step 4] ✓ ${allComments.length} community comments ready — handing off to AI Guardian`);
+
+            // analyzeAnomaly logs the full pipeline (Steps A-F) internally
+            await analyzeAnomaly(runtime, {
+                marketId: config.marketId,
+                currentPrice: midFloat,
+                previousPrice: prevPrice6dec / 1_000_000,
+                priceDrop: priceSwing,
+                geminiModel: config.geminiModel,
+                recentComments: allComments,
+            });
+        } // end hasActiveLoans
     } else {
         runtime.log(`[Step 4] No anomaly (swing: ${(priceSwing * 100).toFixed(2)}% | threshold: ${(dropThreshold * 100).toFixed(0)}%) — AI Guardian not triggered`);
     }
@@ -363,5 +414,5 @@ export async function onCronTrigger(runtime: Runtime<Config>): Promise<string> {
     runtime.log("[Step 6] CRE cycle complete ✓");
     runtime.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-    return `price=${price6dec},drop=${(priceSwing * 100).toFixed(2)}%,liquidatable=${liquidatableCount},atRisk=${atRiskCount}`;
+    return `price=${price6dec},prevPrice=${prevPrice6dec},anomaly=${anomalyDetected ? 1 : 0},drop=${(priceSwing * 100).toFixed(2)}%,liquidatable=${liquidatableCount},atRisk=${atRiskCount}`;
 }
