@@ -371,24 +371,15 @@ async function main() {
         console.log(`\n  ${K.bold}${K.cyan}[Cycle #${runCount}]${K.reset} ${K.dim}${ts}${K.reset}`);
         console.log(`  ${"─".repeat(58)}`);
 
-        // ── Pre-flight: Ensure oracle is in REAL mode ─────────────────────
+        // ── Pre-flight: Log oracle mode (do NOT reset — demo may intentionally set MOCK)
         try {
             const mode = await publicClient.readContract({
                 address: PRICE_ORACLE, abi: ORACLE_ABI,
                 functionName: "mode",
             }) as number;
-            if (mode !== 0) { // 0 = REAL, 1 = MOCK
-                info(`Oracle in MOCK mode — resetting to REAL...`);
-                const resetTx = await adminWallet.writeContract({
-                    address: PRICE_ORACLE, abi: ORACLE_ABI,
-                    functionName: "setMode", args: [0],
-                    chain: null,
-                });
-                await publicClient.waitForTransactionReceipt({ hash: resetTx });
-                ok(`Oracle reset to REAL mode ${K.dim}(was in MOCK from demo)${K.reset}`);
-            }
+            info(`Oracle mode: ${mode === 0 ? "REAL" : "MOCK"}`);
         } catch (e: any) {
-            warn(`Oracle pre-flight failed: ${(e.message ?? String(e)).slice(0, 100)}`);
+            warn(`Oracle pre-flight read failed: ${(e.message ?? String(e)).slice(0, 100)}`);
         }
 
         // ── Part A: CRE Simulate Workflow ─────────────────────────────────
@@ -413,6 +404,29 @@ async function main() {
             await executeRiskActions(publicClient, adminWallet, runCount);
         } catch (e: any) {
             err(`Execution error: ${e.message}`);
+        }
+
+        // ── Post-cycle: Reset oracle to REAL if it was in MOCK ────────────
+        // The demo may have crashed the price via MOCK mode. After the cycle
+        // has detected the anomaly and executed liquidations, reset back to
+        // REAL so the next cycle fetches live Polymarket prices.
+        try {
+            const mode = await publicClient.readContract({
+                address: PRICE_ORACLE, abi: ORACLE_ABI,
+                functionName: "mode",
+            }) as number;
+            if (mode !== 0) { // 0 = REAL, 1 = MOCK
+                info(`Oracle was in MOCK mode — resetting to REAL for next cycle...`);
+                const resetTx = await adminWallet.writeContract({
+                    address: PRICE_ORACLE, abi: ORACLE_ABI,
+                    functionName: "setMode", args: [0],
+                    chain: null,
+                });
+                await publicClient.waitForTransactionReceipt({ hash: resetTx });
+                ok(`Oracle reset to REAL mode`);
+            }
+        } catch (e: any) {
+            warn(`Oracle post-cycle reset failed: ${(e.message ?? String(e)).slice(0, 100)}`);
         }
 
         console.log(`\n  ${"─".repeat(58)}`);

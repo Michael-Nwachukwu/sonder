@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sonder — Full Protocol Flowchart</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #04090f;
+            --blue: #3b8ef5;
+            --blue-d: #1e5fb8;
+            --purple: #a855f7;
+            --teal: #2dd4bf;
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --green: #22c55e;
+            --pink: #ec4899;
+            --indigo: #6366f1;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --card: rgba(255, 255, 255, 0.035);
+            --border: rgba(255, 255, 255, 0.07);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse 90% 40% at 50% 0%, rgba(59, 142, 245, 0.10), transparent),
+                radial-gradient(ellipse 60% 50% at 90% 100%, rgba(168, 85, 247, 0.07), transparent),
+                radial-gradient(ellipse 50% 40% at 0% 60%, rgba(34, 197, 94, 0.04), transparent);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(59, 142, 245, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 142, 245, 0.035) 1px, transparent 1px);
+            background-size: 56px 56px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 52px 28px 80px;
+        }
+
+        /* ────────── HEADER ────────── */
+        .hdr {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .hdr-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--blue);
+            background: rgba(59, 142, 245, 0.09);
+            border: 1px solid rgba(59, 142, 245, 0.22);
+            border-radius: 100px;
+            padding: 7px 20px;
+            margin-bottom: 22px;
+        }
+
+        .hdr-badge::before {
+            content: '●';
+            font-size: 8px;
+            animation: blink 1.4s ease infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.2
+            }
+        }
+
+        .hdr h1 {
+            font-size: clamp(44px, 6vw, 76px);
+            font-weight: 900;
+            letter-spacing: -2.5px;
+            line-height: 1;
+            background: linear-gradient(130deg, #fff 20%, var(--blue) 60%, var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 14px;
+        }
+
+        .hdr p {
+            font-size: 17px;
+            color: var(--muted);
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .hdr p strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* ────────── PHASE LABELS ────────── */
+        .phase {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 36px 0 16px;
+        }
+
+        .phase-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .phase-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .phase-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        /* ────────── ROW HELPERS ────────── */
+        .row {
+            display: flex;
+            gap: 14px;
+            align-items: stretch;
+            margin-bottom: 0;
+        }
+
+        .row.center {
+            justify-content: center;
+        }
+
+        .row.three {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .row.four {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .row.two {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        /* ────────── CONNECTOR ────────── */
+        .arrow-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .arr-line {
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--blue), rgba(59, 142, 245, 0.2));
+        }
+
+        .arr-tip {
+            font-size: 11px;
+            color: var(--blue);
+        }
+
+        .arr-tag {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--blue);
+            background: rgba(59, 142, 245, 0.09);
+            border: 1px solid rgba(59, 142, 245, 0.2);
+            border-radius: 6px;
+            padding: 3px 9px;
+            white-space: nowrap;
+        }
+
+        /* ────────── CARDS ────────── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px 20px;
+            backdrop-filter: blur(10px);
+            animation: fadeUp 0.45s ease both;
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-icon {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .card-label {
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .card-sub {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        /* pill badges */
+        .pill {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 3px 9px;
+            border-radius: 7px;
+            margin-bottom: 7px;
+        }
+
+        .p-blue {
+            background: rgba(59, 142, 245, 0.15);
+            color: var(--blue);
+        }
+
+        .p-purple {
+            background: rgba(168, 85, 247, 0.15);
+            color: var(--purple);
+        }
+
+        .p-teal {
+            background: rgba(45, 212, 191, 0.15);
+            color: var(--teal);
+        }
+
+        .p-orange {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--orange);
+        }
+
+        .p-red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--red);
+        }
+
+        .p-green {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--green);
+        }
+
+        .p-indigo {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--indigo);
+        }
+
+        .p-pink {
+            background: rgba(236, 72, 153, 0.15);
+            color: var(--pink);
+        }
+
+        /* glow variants */
+        .glow-blue {
+            border-color: rgba(59, 142, 245, 0.38);
+            box-shadow: 0 0 28px rgba(59, 142, 245, 0.12);
+        }
+
+        .glow-purple {
+            border-color: rgba(168, 85, 247, 0.38);
+            box-shadow: 0 0 28px rgba(168, 85, 247, 0.12);
+        }
+
+        .glow-teal {
+            border-color: rgba(45, 212, 191, 0.38);
+            box-shadow: 0 0 28px rgba(45, 212, 191, 0.12);
+        }
+
+        .glow-orange {
+            border-color: rgba(245, 158, 11, 0.38);
+            box-shadow: 0 0 28px rgba(245, 158, 11, 0.10);
+        }
+
+        .glow-red {
+            border-color: rgba(239, 68, 68, 0.38);
+            box-shadow: 0 0 28px rgba(239, 68, 68, 0.12);
+        }
+
+        .glow-green {
+            border-color: rgba(34, 197, 94, 0.38);
+            box-shadow: 0 0 28px rgba(34, 197, 94, 0.12);
+        }
+
+        .glow-indigo {
+            border-color: rgba(99, 102, 241, 0.38);
+            box-shadow: 0 0 28px rgba(99, 102, 241, 0.10);
+        }
+
+        /* ── WIDE CARD ── */
+        .card.wide {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+        }
+
+        .card.wide .card-icon {
+            flex-shrink: 0;
+            font-size: 30px;
+            margin-bottom: 0;
+        }
+
+        .card.wide .wide-body {
+            flex: 1;
+        }
+
+        /* ── CRE BIG BLOCK ── */
+        .cre-block {
+            border: 1px solid rgba(59, 142, 245, 0.4);
+            box-shadow: 0 0 60px rgba(59, 142, 245, 0.12), inset 0 1px 0 rgba(59, 142, 245, 0.15);
+            border-radius: 22px;
+            padding: 26px 28px;
+            background: rgba(59, 142, 245, 0.03);
+            animation: fadeUp 0.45s ease 0.3s both;
+        }
+
+        .cre-block-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-bottom: 1px solid rgba(59, 142, 245, 0.15);
+            padding-bottom: 18px;
+            margin-bottom: 20px;
+        }
+
+        .cre-block-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, rgba(59, 142, 245, 0.25), rgba(168, 85, 247, 0.15));
+            border: 1px solid rgba(59, 142, 245, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .cre-block-title {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .cre-block-title span {
+            color: var(--blue);
+        }
+
+        .cre-block-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            font-weight: 600;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .step-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 13px 15px;
+            border-radius: 13px;
+            background: rgba(255, 255, 255, 0.028);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: background 0.2s;
+            cursor: default;
+        }
+
+        .step-row:hover {
+            background: rgba(255, 255, 255, 0.055);
+        }
+
+        .step-row.ai-glowing {
+            border-color: rgba(45, 212, 191, 0.3);
+            background: rgba(45, 212, 191, 0.04);
+            animation: fadeUp 0.4s ease both, teal-pulse 2.5s ease 1.2s infinite;
+        }
+
+        @keyframes teal-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.25);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(45, 212, 191, 0);
+            }
+        }
+
+        .sn {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .step-desc {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ── OUTCOME BAR ── */
+        .outcome-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 0;
+        }
+
+        .oc {
+            border-radius: 16px;
+            padding: 18px 18px;
+            border: 1px solid;
+            text-align: center;
+            animation: fadeUp 0.45s ease both;
+        }
+
+        .oc-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .oc-label {
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .oc-sub {
+            font-size: 11px;
+            line-height: 1.55;
+        }
+
+        .oc.red-oc {
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.05);
+            box-shadow: 0 0 24px rgba(239, 68, 68, 0.1);
+        }
+
+        .oc.red-oc .oc-label {
+            color: var(--red);
+        }
+
+        .oc.red-oc .oc-sub {
+            color: rgba(239, 68, 68, 0.65);
+        }
+
+        .oc.orange-oc {
+            border-color: rgba(245, 158, 11, 0.4);
+            background: rgba(245, 158, 11, 0.05);
+            box-shadow: 0 0 24px rgba(245, 158, 11, 0.08);
+        }
+
+        .oc.orange-oc .oc-label {
+            color: var(--orange);
+        }
+
+        .oc.orange-oc .oc-sub {
+            color: rgba(245, 158, 11, 0.65);
+        }
+
+        .oc.green-oc {
+            border-color: rgba(34, 197, 94, 0.4);
+            background: rgba(34, 197, 94, 0.05);
+            box-shadow: 0 0 24px rgba(34, 197, 94, 0.10);
+        }
+
+        .oc.green-oc .oc-label {
+            color: var(--green);
+        }
+
+        .oc.green-oc .oc-sub {
+            color: rgba(34, 197, 94, 0.65);
+        }
+
+        /* ── DECISION DIAMOND ── */
+        .decision-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .diamond {
+            width: 180px;
+            height: 70px;
+            background: rgba(245, 158, 11, 0.09);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--orange);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.08);
+            position: relative;
+        }
+
+        .diamond::before {
+            content: '⬦';
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 22px;
+            color: var(--orange);
+            opacity: 0.4;
+        }
+
+        /* ── BRANCHING ── */
+        .branch-row {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .branch-yes,
+        .branch-no {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 6px;
+            align-self: center;
+        }
+
+        .branch-yes {
+            color: var(--green);
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+        }
+
+        .branch-no {
+            color: var(--red);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 48px 0 0;
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            text-align: center;
+            margin-top: 52px;
+            padding-top: 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-badges {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .fb {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            border-radius: 100px;
+            border: 1px solid;
+        }
+
+        .fb.c {
+            color: var(--blue);
+            border-color: rgba(59, 142, 245, 0.3);
+            background: rgba(59, 142, 245, 0.07);
+        }
+
+        .fb.g {
+            color: var(--teal);
+            border-color: rgba(45, 212, 191, 0.3);
+            background: rgba(45, 212, 191, 0.07);
+        }
+
+        .fb.p {
+            color: var(--purple);
+            border-color: rgba(168, 85, 247, 0.3);
+            background: rgba(168, 85, 247, 0.07);
+        }
+
+        .fb.po {
+            color: #8247e5;
+            border-color: rgba(130, 71, 229, 0.3);
+            background: rgba(130, 71, 229, 0.07);
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* ── HF STATUS ROW ── */
+        .hf-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .hf-item {
+            border-radius: 12px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.025);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hf-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .hf-dot.g {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        .hf-dot.y {
+            background: var(--orange);
+            box-shadow: 0 0 8px var(--orange);
+        }
+
+        .hf-dot.r {
+            background: var(--red);
+            box-shadow: 0 0 8px var(--red);
+        }
+
+        .hf-text {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .hf-text strong {
+            font-size: 12px;
+            display: block;
+        }
+
+        /* ── LEGEND ── */
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+            padding: 16px 24px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--card);
+        }
+
+        .leg-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .leg-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        /* delays */
+        .d1 {
+            animation-delay: 0.05s;
+        }
+
+        .d2 {
+            animation-delay: 0.12s;
+        }
+
+        .d3 {
+            animation-delay: 0.19s;
+        }
+
+        .d4 {
+            animation-delay: 0.26s;
+        }
+
+        .d5 {
+            animation-delay: 0.33s;
+        }
+
+        .d6 {
+            animation-delay: 0.40s;
+        }
+
+        .d7 {
+            animation-delay: 0.47s;
+        }
+
+        .d8 {
+            animation-delay: 0.54s;
+        }
+
+        .d9 {
+            animation-delay: 0.61s;
+        }
+
+        .d10 {
+            animation-delay: 0.68s;
+        }
+
+        .d11 {
+            animation-delay: 0.75s;
+        }
+
+        .d12 {
+            animation-delay: 0.82s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- ── HEADER ── -->
+        <header class="hdr">
+            <div class="hdr-badge">Live Protocol Flow · End-to-End</div>
+            <h1>Sonder Protocol</h1>
+            <p>Complete user journey — from <strong>deposit &amp; borrowing</strong> through <strong>autonomous CRE
+                    monitoring</strong> to <strong>AI-driven liquidation</strong></p>
+        </header>
+
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  PHASE 1 — USER ACTION               -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="phase">
+            <div class="phase-num"
+                style="background:rgba(99,102,241,0.18);color:var(--indigo);border:1px solid rgba(99,102,241,0.3)">1
+            </div>
+            <div class="phase-label" style="color:var(--indigo)">User Onboarding &amp; Collateral Deposit</div>
+            <div class="phase-line"></div>
+        </div>
+
+        <div class="row three">
+            <div class="card glow-indigo d1">
+                <div class="card-icon">👤</div>
+                <div class="pill p-indigo">User</div>
+                <div class="card-label">Alice Holds YES Tokens</div>
+                <div class="card-sub">Alice holds ERC-1155 YES tokens from a Polymarket prediction market (e.g. "DEMS
+                    2028"). Value is locked until market resolution.</div>
+            </div>
+            <div class="card glow-indigo d2">
+                <div class="card-icon">🔒</div>
+                <div class="pill p-purple">Vault.sol</div>
+                <div class="card-label">Deposit Collateral</div>
+                <div class="card-sub">Alice calls <code
+                        style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--purple)">Vault.deposit(tokenId, amount)</code>.
+                    The Vault takes custody of her ERC-1155 YES tokens.</div>
+            </div>
+            <div class="card glow-indigo d3">
+                <div class="card-icon">📋</div>
+                <div class="pill p-indigo">MarketRegistry.sol</div>
+                <div class="card-label">Market Config Checked</div>
+                <div class="card-sub">Protocol looks up the market: max LTV 40%, liquidation threshold 45%, liquidation
+                    bonus 8%, resolution deadline enforced.</div>
+            </div>
+        </div>
+
+
+        <!-- ── ARROW ── -->
+        <div style="display:flex;justify-content:center;padding:14px 0 6px">
+            <div class="arrow-col">
+                <div class="arr-line"></div>
+                <div class="arr-tag">Collateral secured in Vault</div>
+                <div class="arr-tip">▼</div>
+            </div>
+        </div>
+
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  PHASE 2 — BORROW                    -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="phase">
+            <div class="phase-num"
+                style="background:rgba(59,142,245,0.18);color:var(--blue);border:1px solid rgba(59,142,245,0.3)">2</div>
+            <div class="phase-label" style="color:var(--blue)">Borrowing USDC — Interest Rate Model</div>
+            <div class="phase-line"></div>
+        </div>
+
+        <div class="row two">
+            <div class="card glow-blue d4">
+                <div class="card-icon">💸</div>
+                <div class="pill p-blue">LendingPool.sol · borrow()</div>
+                <div class="card-label">Alice Borrows USDC</div>
+                <div class="card-sub">LendingPool reads her Vault balance, reads the current market probability from
+                    PriceOracle, then calculates her max borrow limit: <strong style="color:var(--blue)">40% of
+                        collateral value</strong>. USDC is transferred to Alice.</div>
+            </div>
+            <div class="card glow-blue d5">
+                <div class="card-icon">📈</div>
+                <div class="pill p-pink">Novel: Probability-Based Rate</div>
+                <div class="card-label">Interest Rate Calculated</div>
+                <div class="card-sub"
+                    style="font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.9; color:var(--muted)">
+                    Rate = 5% + (1 − P) × 20%<br>
+                    <span style="color:var(--green)">P=0.90 → 7%</span>&emsp;(safe collateral)<br>
+                    <span style="color:var(--orange)">P=0.65 → 12%</span>&emsp;(moderate risk)<br>
+                    <span style="color:var(--red)">P=0.10 → 23%</span>&emsp;(high risk)
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ── ARROW ── -->
+        <div style="display:flex;justify-content:center;padding:14px 0 6px">
+            <div class="arrow-col">
+                <div class="arr-line"></div>
+                <div class="arr-tag">Loan active — CRE monitoring begins</div>
+                <div class="arr-tip">▼</div>
+            </div>
+        </div>
+
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  PHASE 3 — CRE AUTONOMOUS CYCLE      -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="phase">
+            <div class="phase-num"
+                style="background:rgba(59,142,245,0.18);color:var(--blue);border:1px solid rgba(59,142,245,0.3)">3</div>
+            <div class="phase-label" style="color:var(--blue)">Chainlink CRE — Autonomous 6-Step Cycle (Every N Minutes)
+            </div>
+            <div class="phase-line"></div>
+        </div>
+
+        <div class="cre-block">
+            <div class="cre-block-header">
+                <div class="cre-block-icon">⛓️</div>
+                <div>
+                    <div class="cre-block-title">Chainlink <span>CRE</span> Workflow / DON</div>
+                    <div class="cre-block-sub">TypeScript → WASM · Runs on Decentralized Oracle Network ·
+                        Consensus-verified EVM writes · Cron-triggered</div>
+                </div>
+            </div>
+            <div class="steps-grid">
+                <div class="step-row">
+                    <div class="sn"
+                        style="background:rgba(59,142,245,0.18);color:var(--blue);border:1px solid rgba(59,142,245,0.28)">
+                        1</div>
+                    <div>
+                        <div class="pill p-blue" style="font-size:9px">HTTPClient</div>
+                        <div class="step-title">Fetch Polymarket Price</div>
+                        <div class="step-desc">GET /midpoint?token_id=… → float mid-price converted to 6-decimal
+                            integer. Pulled live from Polymarket CLOB inside the DON — no centralized server.</div>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <div class="sn"
+                        style="background:rgba(59,142,245,0.18);color:var(--blue);border:1px solid rgba(59,142,245,0.28)">
+                        2</div>
+                    <div>
+                        <div class="pill p-blue" style="font-size:9px">EVMClient</div>
+                        <div class="step-title">Read On-Chain Price</div>
+                        <div class="step-desc">PriceOracle.getPrice(marketId) → ABI-decode Uint8Array → compute % swing
+                            between fetched and stored price.</div>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <div class="sn"
+                        style="background:rgba(168,85,247,0.18);color:var(--purple);border:1px solid rgba(168,85,247,0.28)">
+                        3</div>
+                    <div>
+                        <div class="pill p-purple" style="font-size:9px">DON Signed Write</div>
+                        <div class="step-title">Update Oracle On-Chain</div>
+                        <div class="step-desc">runtime.report() + writeReport() → multi-node DON consensus → broadcasts
+                            updatePrice(). Oracle updated without a single centralized hot wallet.</div>
+                    </div>
+                </div>
+                <div class="step-row ai-glowing">
+                    <div class="sn"
+                        style="background:rgba(45,212,191,0.18);color:var(--teal);border:1px solid rgba(45,212,191,0.28)">
+                        4</div>
+                    <div>
+                        <div class="pill p-teal" style="font-size:9px">AI Guardian · Gemini Flash 2.0</div>
+                        <div class="step-title">Anomaly Detection</div>
+                        <div class="step-desc">If swing ≥ 10%: fetch 20 Polymarket community comments → call Gemini API
+                            with Google Search grounding → structured verdict: REAL / NOISE / UNCERTAIN.</div>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <div class="sn"
+                        style="background:rgba(245,158,11,0.18);color:var(--orange);border:1px solid rgba(245,158,11,0.28)">
+                        5</div>
+                    <div>
+                        <div class="pill p-orange" style="font-size:9px">EVMClient</div>
+                        <div class="step-title">Health Factor Check</div>
+                        <div class="step-desc">LendingPool.getHealthFactor() for every active borrower. Loops all
+                            positions — no off-chain tracking database needed.</div>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <div class="sn"
+                        style="background:rgba(34,197,94,0.18);color:var(--green);border:1px solid rgba(34,197,94,0.28)">
+                        6</div>
+                    <div>
+                        <div class="pill p-green" style="font-size:9px">Structured Output</div>
+                        <div class="step-title">Return Report</div>
+                        <div class="step-desc">"price=…, anomaly=1, drop=…%" → watcher.ts reads output → decides whether
+                            to liquidate or monitor.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HF status -->
+            <div style="margin-top:16px">
+                <div
+                    style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">
+                    Health Factor Classification (Step 5 Output)</div>
+                <div class="hf-row">
+                    <div class="hf-item">
+                        <div class="hf-dot g"></div>
+                        <div class="hf-text"><strong style="color:var(--green)">HF &gt; 1.1 — Healthy</strong>No action.
+                            Continue monitoring.</div>
+                    </div>
+                    <div class="hf-item">
+                        <div class="hf-dot y"></div>
+                        <div class="hf-text"><strong style="color:var(--orange)">HF &lt; 1.1 — At Risk</strong>Flag
+                            borrower. Send alert email.</div>
+                    </div>
+                    <div class="hf-item">
+                        <div class="hf-dot r"></div>
+                        <div class="hf-text"><strong style="color:var(--red)">HF &lt; 1.0 — Liquidatable</strong>Trigger
+                            liquidation pipeline.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ── ARROW ── -->
+        <div style="display:flex;justify-content:center;padding:14px 0 6px">
+            <div class="arrow-col">
+                <div class="arr-line"></div>
+                <div class="arr-tag">watcher.ts reads CRE output</div>
+                <div class="arr-tip">▼</div>
+            </div>
+        </div>
+
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  PHASE 4 — AI GUARDIAN DEEP DIVE     -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="phase">
+            <div class="phase-num"
+                style="background:rgba(45,212,191,0.18);color:var(--teal);border:1px solid rgba(45,212,191,0.3)">4</div>
+            <div class="phase-label" style="color:var(--teal)">AI Guardian — Anomaly Analysis Detail (Triggered by Step
+                4)</div>
+            <div class="phase-line"></div>
+        </div>
+
+        <div class="row three">
+            <div class="card glow-teal d7">
+                <div class="card-icon">📡</div>
+                <div class="pill p-teal">Input Context</div>
+                <div class="card-label">Data Assembled</div>
+                <div class="card-sub">Market ID, current price, previous price, % swing, up to <strong>20 community
+                        comments</strong> fetched from Polymarket Gamma API.</div>
+            </div>
+            <div class="card glow-teal d8">
+                <div class="card-icon">🤖</div>
+                <div class="pill p-teal">Gemini Flash 2.0 + Google Search</div>
+                <div class="card-label">AI Analysis</div>
+                <div class="card-sub">Real-time web search for related news. Comment sentiment processed. Structured
+                    system prompt forces deterministic JSON output.</div>
+            </div>
+            <div class="card glow-teal d9">
+                <div class="card-icon">📋</div>
+                <div class="pill p-green">JSON Verdict</div>
+                <div class="card-label">Structured Decision</div>
+                <div class="card-sub"
+                    style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.9;color:var(--muted)">
+                    verdict: REAL | NOISE | UNCERTAIN<br>
+                    confidence: 0.0 – 1.0<br>
+                    action: LIQUIDATE | MONITOR<br>
+                    sources: [...]
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ── ARROW ── -->
+        <div style="display:flex;justify-content:center;padding:14px 0 6px">
+            <div class="arrow-col">
+                <div class="arr-line" style="background:linear-gradient(to bottom,var(--orange),rgba(245,158,11,0.2))">
+                </div>
+                <div class="arr-tag"
+                    style="color:var(--orange);background:rgba(245,158,11,0.09);border-color:rgba(245,158,11,0.2)">
+                    Decision gate</div>
+                <div class="arr-tip" style="color:var(--orange)">▼</div>
+            </div>
+        </div>
+
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  PHASE 5 — OUTCOMES                  -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="phase">
+            <div class="phase-num"
+                style="background:rgba(239,68,68,0.18);color:var(--red);border:1px solid rgba(239,68,68,0.3)">5</div>
+            <div class="phase-label" style="color:var(--red)">Risk Outcomes &amp; Automated Actions</div>
+            <div class="phase-line"></div>
+        </div>
+
+        <div class="outcome-bar">
+            <div class="oc green-oc d10">
+                <div class="oc-icon">🟢</div>
+                <div class="oc-label">Position Healthy</div>
+                <div class="oc-sub">HF &gt; 1.1. No action taken. CRE continues its next schedule cycle. Alice's loan
+                    accrues interest normally.</div>
+            </div>
+            <div class="oc orange-oc d11">
+                <div class="oc-icon">🟡</div>
+                <div class="oc-label">At-Risk Alert</div>
+                <div class="oc-sub">HF between 1.0–1.1. watcher.ts sends email alert via <strong>Resend API</strong>.
+                    Alice has time to repay or add collateral.</div>
+            </div>
+            <div class="oc red-oc d12">
+                <div class="oc-icon">🔴</div>
+                <div class="oc-label">Liquidation Triggered</div>
+                <div class="oc-sub">HF &lt; 1.0. watcher.ts calls <code
+                        style="font-size:10px;color:var(--red)">seizeCollateral()</code> → Vault releases Alice's YES
+                    tokens → debt cleared → email sent.</div>
+            </div>
+        </div>
+
+
+        <!-- ── ARROW ── -->
+        <div style="display:flex;justify-content:center;padding:14px 0 6px">
+            <div class="arrow-col">
+                <div class="arr-line" style="background:linear-gradient(to bottom,var(--indigo),rgba(99,102,241,0.2))">
+                </div>
+                <div class="arr-tag"
+                    style="color:var(--indigo);background:rgba(99,102,241,0.09);border-color:rgba(99,102,241,0.2)">
+                    Normal flow: loan repaid</div>
+                <div class="arr-tip" style="color:var(--indigo)">▼</div>
+            </div>
+        </div>
+
+
+        <!-- ══════════════════════════════════════ -->
+        <!--  PHASE 6 — REPAY / RESOLUTION        -->
+        <!-- ══════════════════════════════════════ -->
+        <div class="phase">
+            <div class="phase-num"
+                style="background:rgba(34,197,94,0.18);color:var(--green);border:1px solid rgba(34,197,94,0.3)">6</div>
+            <div class="phase-label" style="color:var(--green)">Loan Repayment &amp; Collateral Return</div>
+            <div class="phase-line"></div>
+        </div>
+
+        <div class="row three">
+            <div class="card glow-green d1">
+                <div class="card-icon">💳</div>
+                <div class="pill p-green">LendingPool.sol · repay()</div>
+                <div class="card-label">Alice Repays Debt</div>
+                <div class="card-sub">Alice calls repay() with USDC covering principal + accrued interest. LendingPool
+                    marks the position as closed.</div>
+            </div>
+            <div class="card glow-green d2">
+                <div class="card-icon">🔓</div>
+                <div class="pill p-green">Vault.sol · withdraw()</div>
+                <div class="card-label">Collateral Released</div>
+                <div class="card-sub">Vault transfers Alice's YES tokens back to her wallet. Full ERC-1155 collateral
+                    returned on full repayment.</div>
+            </div>
+            <div class="card glow-green d3">
+                <div class="card-icon">🏆</div>
+                <div class="pill p-indigo">Market Resolved</div>
+                <div class="card-label">Alice Redeems on Polymarket</div>
+                <div class="card-sub">When the prediction market resolves, Alice redeems her YES tokens for USDC on
+                    Polymarket. She borrowed against her position while waiting.</div>
+            </div>
+        </div>
+
+
+        <!-- ── LEGEND ── -->
+        <div class="legend">
+            <div class="leg-item">
+                <div class="leg-dot" style="background:var(--indigo)"></div> User Actions
+            </div>
+            <div class="leg-item">
+                <div class="leg-dot" style="background:var(--blue)"></div> Smart Contracts (Polygon)
+            </div>
+            <div class="leg-item">
+                <div class="leg-dot" style="background:var(--purple)"></div> DON-Signed Writes
+            </div>
+            <div class="leg-item">
+                <div class="leg-dot" style="background:var(--teal)"></div> AI Guardian (Gemini)
+            </div>
+            <div class="leg-item">
+                <div class="leg-dot" style="background:var(--orange)"></div> watcher.ts Daemon
+            </div>
+            <div class="leg-item">
+                <div class="leg-dot" style="background:var(--red)"></div> Liquidation
+            </div>
+            <div class="leg-item">
+                <div class="leg-dot" style="background:var(--green)"></div> Healthy / Repaid
+            </div>
+        </div>
+
+
+        <!-- ── FOOTER ── -->
+        <footer class="footer">
+            <div class="footer-badges">
+                <span class="fb c">Chainlink CRE</span>
+                <span class="fb g">Google Gemini AI</span>
+                <span class="fb p">Polymarket</span>
+                <span class="fb po">Polygon · Tenderly</span>
+            </div>
+            <p>Built for the Chainlink CRE × Google AI Hackathon &mdash; Sonder Protocol &copy; 2025</p>
+        </footer>
+
+    </div>
+</body>
+
+</html>

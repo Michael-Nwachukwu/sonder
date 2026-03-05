@@ -310,10 +310,6 @@ sonder/
 │   ├── demo.ts                   # Interactive 6-step demo runner
 │   ├── oracle.ts                 # Manual oracle mode/price manager
 │   └── watcher.ts                # Autonomous CRE watcher daemon
-│
-└── tasks/
-    ├── todo.md                   # Project progress tracker
-    └── lessons.md                # CRE SDK lessons learned
 ```
 
 ---
