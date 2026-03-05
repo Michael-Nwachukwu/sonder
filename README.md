@@ -6,6 +6,10 @@
 ![Polygon](https://img.shields.io/badge/Polygon-8247E5?style=for-the-badge&logo=polygon&logoColor=white)
 ![Gemini AI](https://img.shields.io/badge/Google_Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white)
 ![Foundry](https://img.shields.io/badge/Foundry-0C0C0C?style=for-the-badge)
+![Tenderly](https://img.shields.io/badge/Tenderly-0C0C0C?style=for-the-badge)
+
+
+Tender virtual testnet explorer - <https://dashboard.tenderly.co/explorer/vnet/33d60b33-6396-4890-9faf-c352e608431b/transactions>
 
 ---
 
@@ -13,7 +17,11 @@
 
 Sonder is a **decentralized lending protocol** that allows users to borrow USDC against their **Polymarket prediction market shares** (YES/NO tokens) as collateral.
 
-What makes Sonder different from any other lending protocol is its **autonomous, AI-powered risk engine** — built entirely on **Chainlink's CRE (Compute Runtime Environment)** and **Google Gemini AI**. There is no centralized backend server. No trusted admin cron job. No manually-run bot with a hot private key.
+Typically, prediction market shares (ERC-1155) are vault shares minted to the bettor in exchange for their USDC. This is a great model, but the only problem is that most prediction markets often take a long while before they are resolved, thats USD value locked for that same amount of time. One of the most popular markets right now on Polymarket is "Democratic Presidential Nominee 2028" with $758M Vol locked resolves Nov 7, 2028. That is $758M locked away from circulation for about 2 years. 
+
+With select markets live on the protocol currently it allows shareholders of select market borrow up to 40% of the value of the shares they hold. 
+
+Sonder's is powered by an **autonomous, AI-powered risk engine** — built entirely on **Chainlink's CRE (Compute Runtime Environment)** and **Google Gemini AI**. There is no centralized backend server. No manually-run bot with a hot private key.
 
 ### What Chainlink CRE Does in Sonder
 
@@ -261,6 +269,8 @@ Examples:
 ```
 
 ### Deployed Addresses (Tenderly, Chain 999137)
+
+Tender virtual testnet explorer - https://dashboard.tenderly.co/explorer/vnet/33d60b33-6396-4890-9faf-c352e608431b/transactions
 
 | Contract | Address |
 |---|---|
