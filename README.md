@@ -8,7 +8,7 @@
 ![Foundry](https://img.shields.io/badge/Foundry-0C0C0C?style=for-the-badge)
 ![Tenderly](https://img.shields.io/badge/Tenderly-0C0C0C?style=for-the-badge)
 
-Tender virtual testnet explorer - <https://dashboard.tenderly.co/explorer/vnet/33d60b33-6396-4890-9faf-c352e608431b/transactions>
+Tenderly virtual testnet explorer - <https://dashboard.tenderly.co/explorer/vnet/33d60b33-6396-4890-9faf-c352e608431b/transactions>
 
 ---
 
