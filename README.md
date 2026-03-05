@@ -175,6 +175,9 @@ Every time the cron triggers, the workflow executes this exact pipeline:
               └─────────────────────────────────┘
 ```
 
+<img width="1512" height="982" alt="Screenshot 2026-03-05 at 11 53 45 AM" src="https://github.com/user-attachments/assets/65a52716-d5c5-4e0a-8ed5-5635b2dea0b4" />
+
+
 ### Why CRE Was Critical
 
 | Problem | Without CRE | With CRE |
