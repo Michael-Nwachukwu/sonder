@@ -8,7 +8,6 @@
 ![Foundry](https://img.shields.io/badge/Foundry-0C0C0C?style=for-the-badge)
 ![Tenderly](https://img.shields.io/badge/Tenderly-0C0C0C?style=for-the-badge)
 
-
 Tender virtual testnet explorer - <https://dashboard.tenderly.co/explorer/vnet/33d60b33-6396-4890-9faf-c352e608431b/transactions>
 
 ---
@@ -17,9 +16,9 @@ Tender virtual testnet explorer - <https://dashboard.tenderly.co/explorer/vnet/3
 
 Sonder is a **decentralized lending protocol** that allows users to borrow USDC against their **Polymarket prediction market shares** (YES/NO tokens) as collateral.
 
-Typically, prediction market shares (ERC-1155) are vault shares minted to the bettor in exchange for their USDC. This is a great model, but the only problem is that most prediction markets often take a long while before they are resolved, thats USD value locked for that same amount of time. One of the most popular markets right now on Polymarket is "Democratic Presidential Nominee 2028" with $758M Vol locked resolves Nov 7, 2028. That is $758M locked away from circulation for about 2 years. 
+Typically, prediction market shares (ERC-1155) are vault shares minted to the bettor in exchange for their USDC. This is a great model, but the only problem is that most prediction markets often take a long while before they are resolved, thats USD value locked for that same amount of time. One of the most popular markets right now on Polymarket is "Democratic Presidential Nominee 2028" with $758M Vol locked resolves Nov 7, 2028. That is $758M locked away from circulation for about 2 years.
 
-With select markets live on the protocol currently it allows shareholders of select market borrow up to 40% of the value of the shares they hold. 
+With select markets live on the protocol currently it allows shareholders of select market borrow up to 40% of the value of the shares they hold.
 
 Sonder's is powered by an **autonomous, AI-powered risk engine** — built entirely on **Chainlink's CRE (Compute Runtime Environment)** and **Google Gemini AI**. There is no centralized backend server. No manually-run bot with a hot private key.
 
@@ -94,18 +93,22 @@ Traditional lending protocols need centralized backend servers to monitor prices
 - **Secrets are managed by CRE.** API keys (Gemini, Polymarket) are injected securely by the DON without exposing them on-chain.
 - **Cron trigger.** The workflow runs on a configurable schedule — no manual invocation needed.
 
-### CRE Workflow File Structure
+### CRE Workflow File Structure & Scripts
 
-```
-sonder-workflow/
-├── main.ts               # Entry point — registers cron trigger + handler
-├── cronCallback.ts        # Core 6-step pipeline logic
-├── aiGuardian.ts          # Gemini AI anomaly analysis module
-├── config.staging.json    # Runtime config injected by CRE
-├── workflow.yaml          # CRE deployment target config
-├── project.yaml           # Chain + RPC routing (maps polygon-mainnet → Tenderly)
-└── secrets.yaml           # Maps env vars to CRE-managed secrets
-```
+Links directly to the Chainlink CRE integration files in our repository:
+
+- **`sonder-workflow/`** *(The Intelligence Layer)*
+  - [`main.ts`](https://github.com/Michael-Nwachukwu/sonder/blob/main/sonder-workflow/main.ts) — Entry point, registers the Chainlink DON cron trigger + handler
+  - [`cronCallback.ts`](https://github.com/Michael-Nwachukwu/sonder/blob/main/sonder-workflow/cronCallback.ts) — Core 6-step pipeline logic executed autonomously by the DON
+  - [`aiGuardian.ts`](https://github.com/Michael-Nwachukwu/sonder/blob/main/sonder-workflow/aiGuardian.ts) — Gemini AI anomaly analysis module
+  - [`config.staging.json`](https://github.com/Michael-Nwachukwu/sonder/blob/main/sonder-workflow/config.staging.json) — Runtime config injected by CRE
+  - [`workflow.yaml`](https://github.com/Michael-Nwachukwu/sonder/blob/main/sonder-workflow/workflow.yaml) — CRE deployment target config
+  - [`project.yaml`](https://github.com/Michael-Nwachukwu/sonder/blob/main/sonder-workflow/project.yaml) — Chain + RPC routing (maps polygon-mainnet → Tenderly)
+  - [`secrets.yaml`](https://github.com/Michael-Nwachukwu/sonder/blob/main/sonder-workflow/secrets.yaml) — Maps environment variables to encrypted CRE-managed secrets
+
+- **`scripts/`** *(The Execution Layer)*
+  - [`watcher.ts`](https://github.com/Michael-Nwachukwu/sonder/blob/main/scripts/watcher.ts) — Autonomous CRE watcher daemon that triggers the executing arm
+  - [`demo.ts`](https://github.com/Michael-Nwachukwu/sonder/blob/main/scripts/demo.ts) — Interactive demo runner simulating the lifecycle
 
 ### The 6-Step CRE Pipeline
 
@@ -270,7 +273,7 @@ Examples:
 
 ### Deployed Addresses (Tenderly, Chain 999137)
 
-Tender virtual testnet explorer - https://dashboard.tenderly.co/explorer/vnet/33d60b33-6396-4890-9faf-c352e608431b/transactions
+Tenderly virtual testnet explorer - <https://dashboard.tenderly.co/explorer/vnet/33d60b33-6396-4890-9faf-c352e608431b/transactions>
 
 | Contract | Address |
 |---|---|
